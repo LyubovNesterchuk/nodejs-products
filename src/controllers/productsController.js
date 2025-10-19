@@ -3,7 +3,9 @@ import { Product } from "../models/product.js";
 
 
 export const getProducts = async(req,res) => {
-const products = await Product.find();
+const products = await Product.find({
+  userId: req.user._id,
+});
 
 res.status(200).json(products);
 };
@@ -11,7 +13,10 @@ res.status(200).json(products);
 
 export const getProductById = async(req, res, next) => {
   const { productId } = req.params;
-  const product =await Product.findById(productId);
+  const product =await Product.findById({
+    _id: productId,
+    userId: req.user._id,
+  });
 
   if (!product) {
     return next(createHttpError(404, "Product not found"));
@@ -22,7 +27,10 @@ export const getProductById = async(req, res, next) => {
 
 
 export const createProduct = async(req, res, next) => {
-  const product = await Product.create(req.body);
+  const product = await Product.create({
+    ...req.body,
+    userId: req.user._id,
+});
 
   res.status(201).json(product);
 };
@@ -31,7 +39,10 @@ export const createProduct = async(req, res, next) => {
 export const updateProduct = async(req, res, next) => {
   const { productId } = req.params;
   const product = await Product.findOneAndUpdate(
-    {_id: productId},
+    {
+      _id: productId,
+      userId: req.user._id,
+    },
     req.body,
     {new: true},
   );
@@ -47,6 +58,7 @@ export const deleteProduct = async(req, res, next) => {
   const { productId } = req.params;
   const product = await Product.findOneAndDelete({
     _id: productId,
+    userId: req.user._id,
   });
 
   if(!product){
